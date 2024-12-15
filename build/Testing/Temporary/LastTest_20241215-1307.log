@@ -1,0 +1,29 @@
+Start testing: Dec 15 16:10 RTZ 2 (çèìà)
+----------------------------------------------------------
+4/4 Testing: ObserverTest.ConsoleLoggerTest
+4/4 Test: ObserverTest.ConsoleLoggerTest
+Command: "C:/lab6/build/googltest.exe" "--gtest_filter=ObserverTest.ConsoleLoggerTest" "--gtest_also_run_disabled_tests"
+Directory: C:/lab6/build
+"ObserverTest.ConsoleLoggerTest" start time: Dec 15 16:10 RTZ 2 (çèìà)
+Output:
+----------------------------------------------------------
+Note: Google Test filter = ObserverTest.ConsoleLoggerTest
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ObserverTest
+[ RUN      ] ObserverTest.ConsoleLoggerTest
+[       OK ] ObserverTest.ConsoleLoggerTest (5 ms)
+[----------] 1 test from ObserverTest (5 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (5 ms total)
+[  PASSED  ] 1 test.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"ObserverTest.ConsoleLoggerTest" end time: Dec 15 16:10 RTZ 2 (çèìà)
+"ObserverTest.ConsoleLoggerTest" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Dec 15 16:10 RTZ 2 (çèìà)

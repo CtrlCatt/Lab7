@@ -1,0 +1,5 @@
+NPCFactoryTest.CreateNPCTest 1 0.008187
+NPCTest.CanKillTest 1 0.0072003
+BattleSystemTest.BattleTest 1 0.0075043
+ObserverTest.ConsoleLoggerTest 1 0.0126265
+---

@@ -1,0 +1,5 @@
+if(EXISTS "C:/lab6/build/googltest[1]_tests.cmake")
+  include("C:/lab6/build/googltest[1]_tests.cmake")
+else()
+  add_test(googltest_NOT_BUILT googltest_NOT_BUILT)
+endif()
