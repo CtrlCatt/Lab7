@@ -70,8 +70,13 @@ int main() {
     srand(time(nullptr));
 
     // Генерация 50 случайных NPC
+    const std::vector<std::string> npcTypes = {"SlaveTrader", "Squirrel", "Knight"};
     for (int i = 0; i < 50; ++i) {
-        npcs.push_back(NPCFactory::createNPC("Squirrel", "Squirrel" + std::to_string(i), rand() % 100, rand() % 100));
+        std::string type = npcTypes[rand() % npcTypes.size()]; // Случайный выбор типа
+        std::string name = type + std::to_string(i); // Уникальное имя NPC
+        int x = rand() % 100; // Случайная координата X
+        int y = rand() % 100; // Случайная координата Y
+        npcs.push_back(NPCFactory::createNPC(type, name, x, y));
     }
 
     std::thread movementThread(moveNPCs);
