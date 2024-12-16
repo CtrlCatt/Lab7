@@ -5,42 +5,94 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <shared_mutex>
+#include <chrono>
+#include <random>
+
+std::vector<std::unique_ptr<NPC>> npcs;
+std::shared_mutex npcMutex;
+
+// Поток 1: перемещение NPC
+void moveNPCs() {
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::unique_lock lock(npcMutex);
+        for (auto& npc : npcs) {
+            if (npc && npc->isAlive()) {
+                npc->move(rand() % npc->getMoveDistance(), rand() % npc->getMoveDistance());
+            }
+        }
+    }
+}
+
+// Поток 2: бои NPC
+void battleNPCs() {
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::unique_lock lock(npcMutex);
+        for (size_t i = 0; i < npcs.size(); ++i) {
+            for (size_t j = i + 1; j < npcs.size(); ++j) {
+                if (npcs[i] && npcs[j] && npcs[i]->isAlive() && npcs[j]->isAlive()) {
+                    int dx = npcs[i]->getX() - npcs[j]->getX();
+                    int dy = npcs[i]->getY() - npcs[j]->getY();
+                    if (std::sqrt(dx * dx + dy * dy) <= npcs[i]->getKillDistance()) {
+                        // Симуляция боя с кубиком
+                        int attack = rand() % 6 + 1;
+                        int defense = rand() % 6 + 1;
+                        if (attack > defense) {
+                            npcs[j]->kill();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Главный поток: отображение карты
+void printMap() {
+    while (true) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::shared_lock lock(npcMutex);
+        std::cout << "Current Map State:\n";
+        for (const auto& npc : npcs) {
+            if (npc && npc->isAlive()) {
+                std::cout << npc->getType() << " (" << npc->getName() << ") at (" 
+                          << npc->getX() << ", " << npc->getY() << ")\n";
+            }
+        }
+    }
+}
 
 int main() {
-    std::vector<std::unique_ptr<NPC>> npcs;
-    BattleSystem battleSystem;
-    battleSystem.addObserver(std::make_unique<ConsoleLogger>());
-    battleSystem.addObserver(std::make_unique<FileLogger>());
+    srand(time(nullptr));
 
-    // Example setup
-    npcs.push_back(NPCFactory::createNPC("SlaveTrader", "Trader1", 200, 200));
-    npcs.push_back(NPCFactory::createNPC("Knight", "Knight1", 205, 205));
-    npcs.push_back(NPCFactory::createNPC("Squirrel", "Squirrel1", 120, 100));
-    npcs.push_back(NPCFactory::createNPC("Squirrel", "Squirrel2", 130, 100));
-    npcs.push_back(NPCFactory::createNPC("SlaveTrader", "Trader2", 250, 250));
-    npcs.push_back(NPCFactory::createNPC("Knight", "Knight2", 255, 255));
-    npcs.push_back(NPCFactory::createNPC("Squirrel", "Squirrel3", 140, 110));
-    npcs.push_back(NPCFactory::createNPC("SlaveTrader", "Trader3", 300, 300));
-    npcs.push_back(NPCFactory::createNPC("Squirrel", "Squirrel4", 400, 400));
-    npcs.push_back(NPCFactory::createNPC("Knight", "Knight3", 305, 305));
-
-
-
-    // Print NPCs
-    std::cout << "Initial NPCs:\n";
-    for (const auto& npc : npcs) {
-        std::cout << npc->getType() << " (" << npc->getName() << ") at (" << npc->getX() << ", " << npc->getY() << ")\n";
+    // Генерация 50 случайных NPC
+    for (int i = 0; i < 50; ++i) {
+        npcs.push_back(NPCFactory::createNPC("Squirrel", "Squirrel" + std::to_string(i), rand() % 100, rand() % 100));
     }
 
-    // Start battle
-    std::cout << "\nBattle starts:\n";
-    battleSystem.battle(npcs, 50);
+    std::thread movementThread(moveNPCs);
+    std::thread battleThread(battleNPCs);
+    std::thread printThread(printMap);
 
-    // Print remaining NPCs
-    std::cout << "\nRemaining NPCs:\n";
-    for (const auto& npc : npcs) {
-        std::cout << npc->getType() << " (" << npc->getName() << ") at (" << npc->getX() << ", " << npc->getY() << ")\n";
+    std::this_thread::sleep_for(std::chrono::seconds(30));
+
+    {
+        std::shared_lock lock(npcMutex);
+        std::cout << "\nGame Over! Surviving NPCs:\n";
+        for (const auto& npc : npcs) {
+            if (npc && npc->isAlive()) {
+                std::cout << npc->getType() << " (" << npc->getName() << ") survived.\n";
+            }
+        }
     }
+
+    movementThread.detach();
+    battleThread.detach();
+    printThread.detach();
 
     return 0;
 }
